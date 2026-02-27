@@ -153,38 +153,24 @@ function buildVolumeMounts(
   // Per-group IPC namespace: each group gets its own IPC directory
   // This prevents cross-group privilege escalation via IPC
   const groupIpcDir = resolveGroupIpcPath(group.folder);
-  fs.mkdirSync(path.join(groupIpcDir, 'messages'), { recursive: true });
-  fs.mkdirSync(path.join(groupIpcDir, 'tasks'), { recursive: true });
-  fs.mkdirSync(path.join(groupIpcDir, 'input'), { recursive: true });
+  // Use 0o777 so the container's node user (uid 1000) can write to these
+  // dirs even though they are created here as root inside the nanoclaw container.
+  for (const sub of ['messages', 'tasks', 'input']) {
+    const dir = path.join(groupIpcDir, sub);
+    fs.mkdirSync(dir, { recursive: true });
+    fs.chmodSync(dir, 0o777);
+  }
+  fs.chmodSync(groupIpcDir, 0o777);
   mounts.push({
     hostPath: groupIpcDir,
     containerPath: '/workspace/ipc',
     readonly: false,
   });
 
-  // Copy agent-runner source into a per-group writable location so agents
-  // can customize it (add tools, change behavior) without affecting other
-  // groups. Recompiled on container startup via entrypoint.sh.
-  const agentRunnerSrc = path.join(
-    projectRoot,
-    'container',
-    'agent-runner',
-    'src',
-  );
-  const groupAgentRunnerDir = path.join(
-    DATA_DIR,
-    'sessions',
-    group.folder,
-    'agent-runner-src',
-  );
-  if (!fs.existsSync(groupAgentRunnerDir) && fs.existsSync(agentRunnerSrc)) {
-    fs.cpSync(agentRunnerSrc, groupAgentRunnerDir, { recursive: true });
-  }
-  mounts.push({
-    hostPath: groupAgentRunnerDir,
-    containerPath: '/app/src',
-    readonly: false,
-  });
+  // NOTE: /app/src is NOT bind-mounted. DATA_DIR (/app/data) is only inside
+  // the nanoclaw container and not visible to the host Docker daemon, so any
+  // hostPath derived from it would resolve to a nonexistent path causing an
+  // empty mount. The agent image ships pre-compiled /app/dist already.
 
   // Additional mounts validated against external allowlist (tamper-proof from containers)
   if (group.containerConfig?.additionalMounts) {

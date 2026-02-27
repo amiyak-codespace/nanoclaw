@@ -1,6 +1,6 @@
 import path from 'path';
 
-import { DATA_DIR, GROUPS_DIR } from './config.js';
+import { DATA_DIR, GROUPS_DIR, STORE_DIR } from './config.js';
 
 const GROUP_FOLDER_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$/;
 const RESERVED_FOLDERS = new Set(['global']);
@@ -37,7 +37,10 @@ export function resolveGroupFolderPath(folder: string): string {
 
 export function resolveGroupIpcPath(folder: string): string {
   assertValidGroupFolder(folder);
-  const ipcBaseDir = path.resolve(DATA_DIR, 'ipc');
+  // IPC dirs must live under STORE_DIR (host-mounted volume) so Docker can
+  // bind-mount them into agent containers via the socket. DATA_DIR is internal
+  // to the nanoclaw container and invisible to the host Docker daemon.
+  const ipcBaseDir = path.resolve(STORE_DIR, 'ipc');
   const ipcPath = path.resolve(ipcBaseDir, folder);
   ensureWithinBase(ipcBaseDir, ipcPath);
   return ipcPath;
