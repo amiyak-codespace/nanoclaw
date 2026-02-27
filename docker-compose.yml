@@ -1,0 +1,29 @@
+services:
+  nanoclaw:
+    build:
+      context: .
+      dockerfile: Dockerfile # Ensure this matches your actual Dockerfile name
+    container_name: nanoclaw
+    restart: unless-stopped
+    
+    environment:
+      - WHATSAPP_EsNABLED=true
+      - GOOGLE_API_KEY=AIzaSyCkEVSGkfAYnKXJzksHSn1RHafN1xZRRAo  # <-- Replace with your key
+      - TZ=Asia/Kolkata
+      # Tells the agent to look for GEMINI.md for instructions
+      - AGENT_RULES_FILE=/app/workspace/GEMINI.md 
+    
+    volumes:
+      - ~/ws/ai-engineer:/app/workspace
+      - ~/ws/nanoclaw_store:/app/store
+      # --- THE CRITICAL ADDITION ---
+      - /var/run/docker.sock:/var/run/docker.sock
+    
+    ports:
+      - "18789:18789" # Gateway UI
+    
+    # c7i-flex.large has 4GB RAM. This prevents the AI from crashing the host.
+    deploy:
+      resources:
+        limits:
+          memory: 512m
