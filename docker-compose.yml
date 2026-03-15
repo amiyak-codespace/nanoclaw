@@ -7,20 +7,15 @@ services:
     restart: unless-stopped
     
     environment:
-      - WHATSAPP_ENABLED=true
-      - GOOGLE_API_KEY=AIzaSyCkEVSGkfAYnKXJzksHSn1RHafN1xZRRAo
+      - WHATSAPP_EsNABLED=true
+      - GOOGLE_API_KEY=AIzaSyCkEVSGkfAYnKXJzksHSn1RHafN1xZRRAo  # <-- Replace with your key
       - TZ=Asia/Kolkata
-      - HOST_PROJECT_ROOT=/Users/amiyakumar.m/Ws/ai-space/nanoclaw
-      - HOST_STORE_DIR=/Users/amiyakumar.m/Ws/ai-space/nanoclaw_store
-      - HOST_DATA_DIR=/Users/amiyakumar.m/Ws/ai-space/nanoclaw_data
-      - HOST_WORKSPACE_DIR=/Users/amiyakumar.m/Ws/ai-space/ai-engineer
       # Tells the agent to look for GEMINI.md for instructions
       - AGENT_RULES_FILE=/app/workspace/GEMINI.md 
     
     volumes:
-      - /Users/amiyakumar.m/Ws/ai-space/ai-engineer:/app/workspace
-      - /Users/amiyakumar.m/Ws/ai-space/nanoclaw_store:/app/store
-      - /Users/amiyakumar.m/Ws/ai-space/nanoclaw_data:/app/data
+      - ~/ws/ai-engineer:/app/workspace
+      - ~/ws/nanoclaw_store:/app/store
       # --- THE CRITICAL ADDITION ---
       - /var/run/docker.sock:/var/run/docker.sock
     
@@ -31,4 +26,4 @@ services:
     deploy:
       resources:
         limits:
-          memory: 2g
+          memory: 512m

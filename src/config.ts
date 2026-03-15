@@ -17,11 +17,7 @@ export const POLL_INTERVAL = 2000;
 export const SCHEDULER_POLL_INTERVAL = 60000;
 
 // Absolute paths needed for container mounts
-export const PROJECT_ROOT = process.cwd();
-export const HOST_PROJECT_ROOT = process.env.HOST_PROJECT_ROOT || process.cwd();
-export const HOST_STORE_DIR = process.env.HOST_STORE_DIR || path.join(HOST_PROJECT_ROOT, 'store');
-export const HOST_DATA_DIR = process.env.HOST_DATA_DIR || path.join(HOST_PROJECT_ROOT, 'data');
-export const HOST_WORKSPACE_DIR = process.env.HOST_WORKSPACE_DIR || path.join(HOST_PROJECT_ROOT, 'workspace');
+const PROJECT_ROOT = process.cwd();
 const HOME_DIR = process.env.HOME || os.homedir();
 
 // Mount security: allowlist stored OUTSIDE project root, never mounted into containers

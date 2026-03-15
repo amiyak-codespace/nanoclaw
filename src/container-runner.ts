@@ -11,13 +11,8 @@ import {
   CONTAINER_MAX_OUTPUT_SIZE,
   CONTAINER_TIMEOUT,
   DATA_DIR,
-  HOST_DATA_DIR,
   GROUPS_DIR,
   IDLE_TIMEOUT,
-  STORE_DIR,
-  HOST_STORE_DIR,
-  PROJECT_ROOT,
-  HOST_PROJECT_ROOT,
   TIMEZONE,
 } from './config.js';
 import { readEnvFile } from './env.js';
@@ -59,7 +54,7 @@ interface VolumeMount {
   readonly: boolean;
 }
 
-export function buildVolumeMounts(
+function buildVolumeMounts(
   group: RegisteredGroup,
   isMain: boolean,
 ): VolumeMount[] {
@@ -74,7 +69,7 @@ export function buildVolumeMounts(
     // (src/, dist/, package.json, etc.) which would bypass the sandbox
     // entirely on next restart.
     mounts.push({
-      hostPath: HOST_PROJECT_ROOT,
+      hostPath: projectRoot,
       containerPath: '/workspace/project',
       readonly: true,
     });
@@ -92,14 +87,14 @@ export function buildVolumeMounts(
 
     // Main also gets its group folder as the working directory
     mounts.push({
-      hostPath: groupDir.replace(PROJECT_ROOT, HOST_PROJECT_ROOT),
+      hostPath: groupDir,
       containerPath: '/workspace/group',
       readonly: false,
     });
   } else {
     // Other groups only get their own folder
     mounts.push({
-      hostPath: groupDir.replace(PROJECT_ROOT, HOST_PROJECT_ROOT),
+      hostPath: groupDir,
       containerPath: '/workspace/group',
       readonly: false,
     });
@@ -109,7 +104,7 @@ export function buildVolumeMounts(
     const globalDir = path.join(GROUPS_DIR, 'global');
     if (fs.existsSync(globalDir)) {
       mounts.push({
-        hostPath: globalDir.replace(PROJECT_ROOT, HOST_PROJECT_ROOT),
+        hostPath: globalDir,
         containerPath: '/workspace/global',
         readonly: true,
       });
@@ -161,7 +156,7 @@ export function buildVolumeMounts(
     }
   }
   mounts.push({
-    hostPath: groupSessionsDir.replace(DATA_DIR, HOST_DATA_DIR),
+    hostPath: groupSessionsDir,
     containerPath: '/home/node/.claude',
     readonly: false,
   });
@@ -178,7 +173,7 @@ export function buildVolumeMounts(
   }
   fs.chmodSync(groupIpcDir, 0o777);
   mounts.push({
-    hostPath: groupIpcDir.replace(STORE_DIR, HOST_STORE_DIR),
+    hostPath: groupIpcDir,
     containerPath: '/workspace/ipc',
     readonly: false,
   });
@@ -243,8 +238,6 @@ function buildContainerArgs(
 
   args.push(CONTAINER_IMAGE);
 
-  console.log('SPAWN ARGS:', args.join(' '));
-
   return args;
 }
 
@@ -264,7 +257,7 @@ export async function runContainerAgent(
   const containerName = `nanoclaw-${safeName}-${Date.now()}`;
   const containerArgs = buildContainerArgs(mounts, containerName);
 
-  logger.info(
+  logger.debug(
     {
       group: group.name,
       containerName,
