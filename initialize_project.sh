@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # --- CONFIGURATION ---
-PROJECT_ROOT="$HOME/ws"
+PROJECT_ROOT="/Users/amiyakumar.m/Ws/ai-space"
 ENGINE_DIR="$PROJECT_ROOT/nanoclaw"
 WORKSPACE_DIR="$PROJECT_ROOT/ai-engineer"
 GEMINI_KEY="AIzaSyCkEVSGkfAYnKXJzksHSn1RHafN1xZRRAo" # <--- PASTE KEY HERE
